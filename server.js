@@ -14,7 +14,7 @@ app.get('/api/notes', (req, res) => {
     // matches against title and content
     const results = data.filter((item) => {
       return item.title.includes(searchTerm)
-      || item.content.includes(searchTerm);
+        || item.content.includes(searchTerm);
     });
     return res.json(results);
   } else {
