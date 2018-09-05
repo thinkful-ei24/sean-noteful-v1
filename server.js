@@ -4,10 +4,13 @@
 const data = require('./db/notes');
 const express = require('express');
 const { PORT } = require('./config');
+const {logger} = require('./middleware/logger');
 
 const app = express();
 
 app.use(express.static('public'));
+
+app.use(logger);
 
 app.get('/api/notes', (req, res) => {
   const {searchTerm} = req.query;
