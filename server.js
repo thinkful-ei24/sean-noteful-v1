@@ -26,10 +26,14 @@ app.get('/api/notes', (req, res, next) => {
   });
 });
 
-app.get('/api/notes/:id', (req, res) => {
+app.get('/api/notes/:id', (req, res, next) => {
   const {id} = req.params;
-  const matchingItem = data.find(item => item.id === Number(id));
-  res.json(matchingItem);
+  notes.find(id, (err, item) => {
+    if(err) {
+      return next(err);
+    }
+    res.json(item);
+  });
 });
 
 app.use(function (req, res, next) {
