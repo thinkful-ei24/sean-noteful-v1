@@ -6,6 +6,7 @@ function logger(req, res, next) {
     `${now.toLocaleDateString()} ${now.toLocaleTimeString()}` +
     ` ${req.method} ${req.url}`;
   console.log(formattedLog);
+  next();
 }
 
 module.exports = {logger};
