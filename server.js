@@ -11,9 +11,11 @@ const { logger } = require('./middleware/logger');
 
 const app = express();
 
+app.use(logger);
+
 app.use(express.static('public'));
 
-app.use(logger);
+app.use(express.json());
 
 app.get('/api/notes', (req, res, next) => {
   const {searchTerm} = req.query;
@@ -26,7 +28,34 @@ app.get('/api/notes', (req, res, next) => {
   });
 });
 
+app.put('/api/notes/:id', (req, res, next) => {
+  console.log('routed POST request with an id');
+  const id = req.params.id;
+
+  /***** Never trust users - validate input *****/
+  const updateObj = {};
+  const updateFields = ['title', 'content'];
+
+  updateFields.forEach(field => {
+    if (field in req.body) {
+      updateObj[field] = req.body[field];
+    }
+  });
+
+  notes.update(id, updateObj, (err, item) => {
+    if (err) {
+      return next(err);
+    }
+    if (item) {
+      res.json(item);
+    } else {
+      next();
+    }
+  });
+});
+
 app.get('/api/notes/:id', (req, res, next) => {
+  console.log('routed GET request with an id');
   const {id} = req.params;
   notes.find(id, (err, item) => {
     if(err) {
