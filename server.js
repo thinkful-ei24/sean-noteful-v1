@@ -11,59 +11,15 @@ const { PORT } = require('./config');
 
 const app = express();
 
+const notesRouter = require('./router/notes.router.js');
+
 app.use(morgan('dev'));
 
 app.use(express.static('public'));
 
 app.use(express.json());
 
-app.get('/api/notes', (req, res, next) => {
-  const {searchTerm} = req.query;
-
-  notes.filter(searchTerm, (err, list) => {
-    if(err) {
-      return next(err);
-    }
-    res.json(list);
-  });
-});
-
-app.put('/api/notes/:id', (req, res, next) => {
-  console.log('routed POST request with an id');
-  const id = req.params.id;
-
-  /***** Never trust users - validate input *****/
-  const updateObj = {};
-  const updateFields = ['title', 'content'];
-
-  updateFields.forEach(field => {
-    if (field in req.body) {
-      updateObj[field] = req.body[field];
-    }
-  });
-
-  notes.update(id, updateObj, (err, item) => {
-    if (err) {
-      return next(err);
-    }
-    if (item) {
-      res.json(item);
-    } else {
-      next();
-    }
-  });
-});
-
-app.get('/api/notes/:id', (req, res, next) => {
-  console.log('routed GET request with an id');
-  const {id} = req.params;
-  notes.find(id, (err, item) => {
-    if(err) {
-      return next(err);
-    }
-    res.json(item);
-  });
-});
+app.use('/api', notesRouter);
 
 app.use(function (req, res, next) {
   var err = new Error('Not Found');
