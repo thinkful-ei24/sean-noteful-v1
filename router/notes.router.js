@@ -79,4 +79,18 @@ router.get('/notes/:id', (req, res, next) => {
   });
 });
 
+router.delete('/notes/:id', (req, res, next) => {
+  const {id} = req.params;
+
+  notes.delete(id, (err, len) => {
+    // TODO should the error just be passed straight to the client?
+    // Is any more error checking or validation required?
+    if(err) {
+      return next(err);
+    } else {
+      res.sendStatus(204).end();
+    }
+  });
+});
+
 module.exports = router;
