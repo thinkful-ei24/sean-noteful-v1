@@ -11,15 +11,16 @@ const router = express.Router();
 router.get('/notes', (req, res, next) => {
   const {searchTerm} = req.query;
 
-  notes.filter(searchTerm, (err, list) => {
-    if(err) {
-      return next(err);
-    }
-    res.json(list);
-  });
+  notes.filter(searchTerm)
+    .then(list => {
+      return res.json(list);
+    })
+    .catch(err => {
+      next(err);
+    });
 });
 
-router.post('/notes/:id', (req, res, next) => {
+router.post('/notes', (req, res, next) => {
   const {title, content} = req.body;
 
   const newItem = {title, content};
@@ -31,23 +32,23 @@ router.post('/notes/:id', (req, res, next) => {
     return next(err);
   }
 
-  notes.create(newItem, (err, item) => {
-    if(err) {
-      return next(err);
-    }
-    if(item) {
-      // set proper headers
-      res.location(`http://${req.headers.host}/notes/${item.id}`).status(201).json(item);
-    } else {
-      next();
-    }
-  });
+  notes.create(newItem)
+    .then(item => {
+      if(item) {
+        return res.location(`http://${req.headers.host}/notes/${item.id}`).status(201).json(item);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      next(err);
+    });
 });
 
 router.put('/notes/:id', (req, res, next) => {
   const id = req.params.id;
 
-  /***** Never trust users - validate input *****/
+  // validate input
   const updateObj = {};
   const updateFields = ['title', 'content'];
 
@@ -57,40 +58,44 @@ router.put('/notes/:id', (req, res, next) => {
     }
   });
 
-  notes.update(id, updateObj, (err, item) => {
-    if (err) {
-      return next(err);
-    }
-    if (item) {
-      res.json(item);
-    } else {
-      next();
-    }
-  });
+  notes.update(id, updateObj)
+    .then(item => {
+      if(item) {
+        return res.json(item);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
+      next(err);
+    });
 });
 
 router.get('/notes/:id', (req, res, next) => {
   const {id} = req.params;
-  notes.find(id, (err, item) => {
-    if(err) {
+  notes.find(id)
+    .then(item => {
+      if(item) {
+        res.json(item);
+      } else {
+        next();
+      }
+    })
+    .catch(err => {
       return next(err);
-    }
-    res.json(item);
-  });
+    });
 });
 
 router.delete('/notes/:id', (req, res, next) => {
   const {id} = req.params;
 
-  notes.delete(id, (err, len) => {
-    // TODO should the error just be passed straight to the client?
-    // Is any more error checking or validation required?
-    if(err) {
-      return next(err);
-    } else {
+  notes.delete(id)
+    .then(len => {
       res.sendStatus(204).end();
-    }
-  });
+    })
+    .catch(err => {
+      return next(err);
+    });
 });
 
 module.exports = router;
